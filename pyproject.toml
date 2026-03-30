@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "drf-turbo"
-version = "0.1.6"
+version = "0.2.0"
 description = "An alternative serializer implementation for REST framework written in cython built for speed."
 readme = "README.rst"
 requires-python = ">=3.10"
