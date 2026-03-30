@@ -18,7 +18,7 @@ with open("requirements.txt") as requirements_file:
 setup(
     author="Michael Gendy",
     author_email="mngback@gmail.com",
-    python_requires=">=3.6",
+    python_requires=">=3.10",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -39,7 +39,7 @@ setup(
     packages=find_packages(include=["drf_turbo", "drf_turbo.*"]),
     test_suite="tests",
     url="https://github.com/Mng-dev-ai/drf-turbo",
-    version="0.1.6",
+    version="0.2.0.dev",
     zip_safe=False,
     # Ensure `cimport cython_metaclass` and similar work when running under
     # PEP 517 build backends (where Cython's working directory may differ).
