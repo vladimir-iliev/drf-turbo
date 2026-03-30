@@ -41,5 +41,7 @@ setup(
     url="https://github.com/Mng-dev-ai/drf-turbo",
     version="0.1.6",
     zip_safe=False,
-    ext_modules=cythonize(["drf_turbo/*.pyx"]),
+    # Ensure `cimport cython_metaclass` and similar work when running under
+    # PEP 517 build backends (where Cython's working directory may differ).
+    ext_modules=cythonize(["drf_turbo/*.pyx"], include_path=["drf_turbo"]),
 )

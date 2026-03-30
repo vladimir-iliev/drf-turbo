@@ -1,0 +1,43 @@
+[build-system]
+requires = [
+  "setuptools>=61",
+  "wheel",
+  "cython>=3.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drf-turbo"
+version = "0.1.6"
+description = "An alternative serializer implementation for REST framework written in cython built for speed."
+readme = "README.rst"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Michael Gendy", email = "mngback@gmail.com" }]
+keywords = ["drf_turbo"]
+dependencies = [
+  "forbiddenfruit>=0.1.4",
+  "djangorestframework>=3.12.4",
+  "pyyaml>=6.0,<7.0",
+  "uritemplate>=4.1.1",
+  "cython>=3.0",
+  "djangorestframework-simplejwt>=5.2.0",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["drf_turbo*"]
+

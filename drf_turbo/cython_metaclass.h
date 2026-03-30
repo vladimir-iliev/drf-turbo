@@ -21,15 +21,30 @@ static PyObject* NoneNoneNone;
 static CYTHON_INLINE PyObject* PyMethodDescr_CallSelf(PyMethodDescrObject* desc, PyObject* self)
 {
     PyMethodDef* meth = desc->d_method;
-
-    /* This must be a METH_NOARGS method */
-    if (meth == NULL || (meth->ml_flags & METH_ALLARGS) != METH_NOARGS)
+    if (meth == NULL)
     {
         PyErr_SetString(PyExc_TypeError,
-                "PyMethodDescr_CallSelf requires a method without arguments");
+                "PyMethodDescr_CallSelf missing method implementation");
         return NULL;
     }
 
+    /*
+     * Call the underlying method implementation with *zero* arguments
+     * beyond `self`.
+     *
+     * Cython can generate `METH_FASTCALL|METH_KEYWORDS` wrappers even for
+     * methods that accept no extra args. In that case we must use the
+     * fastcall calling convention (vectorcall), not the legacy
+     * `PyCFunction(self, args)` convention.
+     */
+    if (meth->ml_flags & METH_FASTCALL)
+    {
+        if (meth->ml_flags & METH_KEYWORDS)
+            return ((_PyCFunctionFastWithKeywords)meth->ml_meth)(self, NULL, 0, NULL);
+        return ((_PyCFunctionFast)meth->ml_meth)(self, NULL, 0);
+    }
+
+    /* Fallback for non-fastcall methods (e.g. METH_NOARGS). */
     return meth->ml_meth(self, NULL);
 }
 
@@ -52,7 +67,9 @@ static CYTHON_INLINE int Sage_PyType_Ready(PyTypeObject* t)
     getmetaclass = PyObject_GetAttrString((PyObject*)t, "__getmetaclass__");
     if (getmetaclass)
     {
-        /* Call getmetaclass with self=None */
+        /* Call getmetaclass with self=None.
+         * We bypass Python's descriptor binding rules by calling the
+         * underlying PyMethodDef directly (see PyMethodDescr_CallSelf()). */
         metaclass = (PyTypeObject*)(PyMethodDescr_CallSelf((PyMethodDescrObject*)getmetaclass, Py_None));
         Py_DECREF(getmetaclass);
         if (!metaclass)
@@ -65,8 +82,10 @@ static CYTHON_INLINE int Sage_PyType_Ready(PyTypeObject* t)
             return -1;
         }
 
-        /* Now, set t.__class__ to metaclass */
-        Py_TYPE(t) = metaclass;
+        /* Now, set t.__class__ to metaclass.
+         * `Py_TYPE()` is not a valid lvalue on some Python versions/compilers;
+         * `Py_SET_TYPE()` is the supported way to update the type. */
+        Py_SET_TYPE(t, metaclass);
         PyType_Modified(t);
     }
     else
